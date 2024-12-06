@@ -1,30 +1,75 @@
+<?php
+require_once 'config/database.php';
+
+// Mengambil jumlah artikel
+$articleStmt = $conn->query("SELECT COUNT(*) FROM articles");
+$articleCount = $articleStmt->fetchColumn();
+
+// Mengambil jumlah kategori
+$categoryStmt = $conn->query("SELECT COUNT(*) FROM categories");
+$categoryCount = $categoryStmt->fetchColumn();
+
+// Mengambil jumlah tag
+$tagStmt = $conn->query("SELECT COUNT(*) FROM tags");
+$tagCount = $tagStmt->fetchColumn();
+?>
+
+
+<?php
+session_start();
+
+// Cek apakah pengguna sudah login dan apakah role-nya 'admin'
+if ($_SESSION['role'] != 'admin') {
+    // Jika bukan admin, alihkan ke halaman login
+    header("Location: login.php");
+    exit();
+}
+?>
+
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tambah Artikel</title>
+    <title>Dashboard Admin</title>
 </head>
 <body>
-    <h1>Tambah Artikel Baru</h1>
-
-    <form action="create_article.php" method="POST">
-        <label for="title">Judul Artikel:</label>
-        <input type="text" id="title" name="title" required><br><br>
-
-        <label for="author">Penulis:</label>
-        <input type="text" id="author" name="author" required><br><br>
-
-        <label for="content">Konten:</label>
-        <textarea id="content" name="content" required></textarea><br><br>
-
-        <label for="tags">Tag (pisahkan dengan koma):</label>
-        <input type="text" id="tags" name="tags" required><br><br>
-
-        <label for="categories">Kategori (pisahkan dengan koma):</label>
-        <input type="text" id="categories" name="categories" required><br><br>
-
-        <input type="submit" value="Tambah Artikel">
-    </form>
+    <h2>Dashboard Admin</h2>
+    <p>Selamat datang, <?php echo $_SESSION['username']; ?>!</p>
+    <!-- Konten dashboard admin lainnya -->
 </body>
 </html>
+
+<div class="dashboard">
+    <h2>Dashboard Admin</h2>
+    <div class="stats">
+        <p>Jumlah Artikel: <?php echo $articleCount; ?></p>
+        <p>Jumlah Kategori: <?php echo $categoryCount; ?></p>
+        <p>Jumlah Tag: <?php echo $tagCount; ?></p>
+    </div>
+</div>
+<div class="actions">
+    <h3>Manajemen Konten</h3>
+    <ul>
+        <li><a href="articles/create_article.php">Tambah Artikel</a></li>
+        <li><a href="list_articles.php">Lihat Semua Artikel</a></li>
+        <li><a href="create_category.php">Tambah Kategori</a></li>
+        <li><a href="list_categories.php">Lihat Semua Kategori</a></li>
+        <li><a href="create_tag.php">Tambah Tag</a></li>
+        <li><a href="list_tags.php">Lihat Semua Tag</a></li>
+    </ul>
+</div>
+
+<?php
+// Mengambil artikel terbaru
+$latestArticlesStmt = $conn->query("SELECT title FROM articles ORDER BY created_at DESC LIMIT 5");
+
+$latestArticles = $latestArticlesStmt->fetchAll();
+
+// Menampilkan artikel terbaru
+echo "<h3>Artikel Terbaru</h3><ul>";
+foreach ($latestArticles as $article) {
+    echo "<li>" . $article['title'] . "</li>";
+}
+echo "</ul>";
+?>
